@@ -19,12 +19,14 @@ struct LazyBridgeOptimizer{OT<:MOI.ModelLike, MT<:MOI.ModelLike} <: AbstractBrid
     best::Dict{Tuple{DataType, DataType}, DataType} # (F, S) -> Bridge to be used for an `F`-in-`S` constraint
 end
 function LazyBridgeOptimizer(model::MOI.ModelLike, bridged::MOI.ModelLike)
-    LazyBridgeOptimizer{typeof(model),
-                             typeof(bridged)}(model, bridged,
-                                              Dict{CI, AbstractBridge}(),
-                                              Any[],
-                                              Dict{Tuple{DataType, DataType}, Int}(),
-                                              Dict{Tuple{DataType, DataType}, DataType}())
+    optimizer = LazyBridgeOptimizer{typeof(model), typeof(bridged)}(
+        model, bridged, Dict{CI, AbstractBridge}(), Any[],
+        Dict{Tuple{DataType, DataType}, Int}(),
+        Dict{Tuple{DataType, DataType}, DataType}())
+    for bridge in MOI.get(model, MOI.RequiredBridges())
+        add_bridge(model, bridge)
+    end
+    return optimizer
 end
 
 function _dist(b::LazyBridgeOptimizer, F::Type{<:MOI.AbstractFunction}, S::Type{<:MOI.AbstractSet})

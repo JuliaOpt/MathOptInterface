@@ -521,3 +521,54 @@ function solve_zero_one_with_bounds_3(model::MOI.ModelLike, config::TestConfig)
     end
 end
 unittests["solve_zero_one_with_bounds_3"] = solve_zero_one_with_bounds_3
+
+function solve_one_sided_intervals(model::MOI.ModelLike, config::TestConfig)
+    MOI.empty!(model)
+    MOIU.loadfromstring!(
+        model,
+        """
+    variables: x, y, z
+    maxobjective: x + -1y + z
+    c1: x in Interval(-Inf, 1.0)
+    c2: y in Interval(-1.0, Inf)
+    c3: z in Interval(-Inf, Inf)
+    c4: 1z <= 1.0
+""",
+    )
+
+    x = MOI.get(model, MOI.VariableIndex, "x")
+    y = MOI.get(model, MOI.VariableIndex, "y")
+    z = MOI.get(model, MOI.VariableIndex, "z")
+
+    c1 = MOI.get(
+        model,
+        MOI.ConstraintIndex{MOI.SingleVariable, MOI.Interval{Float64}},
+        "c1"
+    )
+    c2 = MOI.get(
+        model,
+        MOI.ConstraintIndex{MOI.SingleVariable, MOI.Interval{Float64}},
+        "c2"
+    )
+    c3 = MOI.get(
+        model,
+        MOI.ConstraintIndex{MOI.SingleVariable, MOI.Interval{Float64}},
+        "c3"
+    )
+
+    @test MOI.get(model, MOI.ConstraintIndex, "c1") == c1
+    @test MOI.get(model, MOI.ConstraintIndex, "c2") == c2
+    @test MOI.get(model, MOI.ConstraintIndex, "c3") == c3
+    
+    @test MOI.is_valid(model, c1)
+    @test MOI.is_valid(model, c2)
+    @test MOI.is_valid(model, c3)
+
+    return test_model_solution(
+        model,
+        config;
+        objective_value = 3.0,
+        variable_primal = [(x, 1.0), (y, -1.0), (z, 1.0)],
+    )
+end
+unittests["solve_one_sided_intervals"] = solve_one_sided_intervals

@@ -90,7 +90,7 @@ function test_contquadratictest()
 end
 
 function test_contconic()
-    MOI.Test.contlineartest(BRIDGED, CONFIG)
+    MOI.Test.contconictest(BRIDGED, CONFIG)
 end
 
 function test_intconic()

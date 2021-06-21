@@ -787,7 +787,7 @@ function MOI.get(model::CachingOptimizer, attr::MOI.AbstractModelAttribute)
         end
         return map_indices(
             model.optimizer_to_model_map,
-            MOI.get(model.optimizer, attr),
+            MOI.get(model.optimizer, attr)::MOI.attribute_value_type(attr),
         )
     else
         return MOI.get(model.model_cache, attr)
@@ -828,7 +828,11 @@ function MOI.get(
         end
         return map_indices(
             model.optimizer_to_model_map,
-            MOI.get(model.optimizer, attr, model.model_to_optimizer_map[index]),
+            MOI.get(
+                model.optimizer,
+                attr,
+                model.model_to_optimizer_map[index],
+            )::MOI.attribute_value_type(attr),
         )
     else
         return MOI.get(model.model_cache, attr, index)
@@ -852,7 +856,7 @@ function MOI.get(
                 model.optimizer,
                 attr,
                 map(index -> model.model_to_optimizer_map[index], indices),
-            ),
+            )::Vector{<:MOI.attribute_value_type(attr)},
         )
     else
         return MOI.get(model.model_cache, attr, indices)
@@ -921,7 +925,7 @@ function MOI.get(model::CachingOptimizer, attr::MOI.AbstractOptimizerAttribute)
     end
     return map_indices(
         model.optimizer_to_model_map,
-        MOI.get(model.optimizer, attr),
+        MOI.get(model.optimizer, attr)::MOI.attribute_value_type(attr),
     )
 end
 
@@ -964,7 +968,7 @@ function MOI.get(
     @assert m.state == ATTACHED_OPTIMIZER
     return map_indices(
         m.optimizer_to_model_map,
-        MOI.get(m.optimizer, attr.attr),
+        MOI.get(m.optimizer, attr.attr)::MOI.attribute_value_type(attr.attr),
     )
 end
 
@@ -978,7 +982,11 @@ function MOI.get(
     @assert m.state == ATTACHED_OPTIMIZER
     return map_indices(
         m.optimizer_to_model_map,
-        MOI.get(m.optimizer, attr.attr, m.model_to_optimizer_map[idx]),
+        MOI.get(
+            m.optimizer,
+            attr.attr,
+            m.model_to_optimizer_map[idx],
+        )::MOI.attribute_value_type(attr.attr),
     )
 end
 
@@ -996,7 +1004,7 @@ function MOI.get(
             m.optimizer,
             attr.attr,
             getindex.(m.model_to_optimizer_map, idx),
-        ),
+        )::Vector{<:MOI.attribute_value_type(attr.attr)},
     )
 end
 

@@ -156,14 +156,6 @@ function matrix_instance(
     }()
 end
 
-MOIU.@mix_of_scalar_sets(
-    MixLP,
-    MOI.EqualTo{T},
-    MOI.GreaterThan{T},
-    MOI.LessThan{T},
-    MOI.Interval{T},
-)
-
 MOIU.@product_of_sets(
     OrdLP,
     MOI.EqualTo{T},
@@ -185,7 +177,7 @@ MOIU.@product_of_sets(
     )
     blp = MOI.Utilities.Box([5, 0, -Inf, 6], [5, Inf, 0, 7])
     F = MOI.ScalarAffineFunction{Float64}
-    @testset "$SetType" for SetType in [MixLP{Float64}, OrdLP{Float64}]
+    @testset "$SetType" for SetType in [OrdLP{Float64}]
         _test(
             MOIT.linear2test,
             MOI.Utilities.Box{Float64},

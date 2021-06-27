@@ -187,6 +187,7 @@ errors can be thrown.
 """
 function attach_optimizer(model::CachingOptimizer)
     @assert model.state == EMPTY_OPTIMIZER
+    final_touch(model, nothing)
     # We do not need to copy names because name-related operations are handled
     # by `m.model_cache`
     indexmap = MOI.copy_to(

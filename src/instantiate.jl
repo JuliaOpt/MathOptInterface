@@ -113,6 +113,7 @@ problem incrementally (see [`supports_incremental_interface`](@ref)), or does
 not support names and `with_names` is `true`, then a
 [`Utilities.CachingOptimizer`](@ref) is added to store a cache of the bridged
 model. Hence set `with_names` to `true` if names might be set.
+The cache used is instantiated with [`default_cache`](@ref).
 """
 function instantiate(
     optimizer_constructor;
@@ -124,9 +125,22 @@ function instantiate(
         return optimizer
     end
     if !supports_incremental_interface(optimizer, with_names)
-        universal_fallback =
-            Utilities.UniversalFallback(Utilities.Model{with_bridge_type}())
-        optimizer = Utilities.CachingOptimizer(universal_fallback, optimizer)
+        cache = default_cache(optimizer, with_bridge_type)
+        optimizer = Utilities.CachingOptimizer(cache, optimizer)
     end
     return Bridges.full_bridge_optimizer(optimizer, with_bridge_type)
+end
+
+"""
+    default_cache(optimizer::ModelLike, ::Type{T}) where {T}
+
+Return a new instance of the default model type to be used as cache for
+`optimizer` in a [`Utilities.CachingOptimizer`](@ref) for holding constraints
+of coefficient type `T`. By default, this returns
+`Utilities.UniversalFallback(Utilities.Model{T}())`. If copying from a instance
+of a given model type is faster for `optimizer` then a new method returning
+an instance of this model type should be defined.
+"""
+function default_cache(::ModelLike, ::Type{T}) where {T}
+    return Utilities.UniversalFallback(Utilities.Model{T}())
 end
